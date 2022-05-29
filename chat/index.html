@@ -9,35 +9,39 @@
 <body>
   <div>HOME SWEET HOME</div>
   <form id="publish" class="form-inline" action="">
-    <input type="text" name="message">
+    <input type="text" name="userName" placeholder="Write your name" class="user-name-input">
+    <input type="text" name="message" class="message-input">
     <input type="submit">
   </form>
   <ul id="messages"></ul>
 </body>
 <script>
+  const input = document.querySelector('.message-input')
+  const userInput = document.querySelector('.user-name-input')
   publish.onsubmit = function() {
     fetch('http://localhost:3006/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(this.elements.message.value)
+      body: JSON.stringify({
+        message: input.value,
+        user: userInput.value
+      })
     })
-    this.elements.message.value = "";
+    input.value = "";
     return false;
   };
   subscribe();
   async function subscribe() {
     try {
-      const response = await fetch('http://localhost:3006/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(this.elements.message.value)
-      });
+      const {message, user} = await fetch('http://localhost:3006/subscribe').then(response => response.json());
       const li = document.createElement('li');
-      li.textContent = response;
+      li.textContent = message;
+      li.innerHTML = `
+        <span style="color: red;">${user}: </span>
+        ${message}
+      `;
       messages.appendChild(li);
       subscribe();
     } catch(err) {
